@@ -6,9 +6,6 @@ import collections
 import torch
 import argparse
 import numpy as np
-#import torch.nn as nn
-#import torch.nn.functional as F
-#import pytesseract
 import params
 import torchvision.transforms as transforms
 
@@ -19,9 +16,6 @@ from Detection.PSEnet import models
 from Detection.PSEnet import util
 from Detection.PSEnet.pypse import pse as pypse
 from PIL import Image
-from Recognition.crnn.models import crnn
-from Recognition.crnn import utils
-#from Recognition.crnn import params
 
 def scaleimg(img, long_size=2240):
     h, w = img.shape[0:2]
@@ -50,23 +44,16 @@ def drawBBox(bboxs,img):
         cv2.drawContours(img, [bbox],-1, (0, 255, 0), 2)
     cv2.imwrite('result.jpg',img)
 
-def detect(org_img):
-    if params.arch == "resnet50":
-        model = models.resnet50(pretrained=True, num_classes=7, scale=params.scale)
-    elif params.arch == "resnet101":
-        model = models.resnet101(pretrained=True, num_classes=7, scale=params.scale)
-    elif params.arch == "resnet152":
-        model = models.resnet152(pretrained=True, num_classes=7, scale=params.scale)
-    for param in model.parameters():
-        param.requires_grad = False
+def detect(org_img, arch):
+    model = models.resnet50(pretrained=False, num_classes=7, scale=params.scale)
 
-    model = model.cuda()
+    DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    if params.PSEnet_path is not None:                                         
+    if params.PSEnet_path is not None:
         if os.path.isfile(params.PSEnet_path):
             print("Loading model and optimizer from checkpoint '{}'".format(params.PSEnet_path))
-            checkpoint = torch.load(params.PSEnet_path)
-            
+            checkpoint = torch.load(params.PSEnet_path, map_location=DEVICE)
+
             # model.load_state_dict(checkpoint['state_dict'])
             d = collections.OrderedDict()
             for key, value in checkpoint['state_dict'].items():
@@ -96,7 +83,7 @@ def detect(org_img):
     #img = img.convert('RGB')
     #img = torch.Tensor(img)
     #img = img.permute(0,3,1,2)
-    scaled_img = Variable(scaled_img.cuda())
+    scaled_img = Variable(scaled_img)
 
     outputs = model(scaled_img)
 
@@ -132,49 +119,17 @@ def detect(org_img):
     drawBBox(bboxes,org_img)
     return bboxes
 
-def recognise(bboxes,org_img):
-    nclass = len(params.alphabet) + 1
-    model = crnn.CRNN(params.imgH, params.nc, nclass, params.nh)
-    if torch.cuda.is_available():
-        model = model.cuda()
-
-    # load model
-    print('loading pretrained model from %s' % params.crnn_path)
-    if params.multi_gpu:
-        model = torch.nn.DataParallel(model)
-    model.load_state_dict(torch.load(params.crnn_path))
-    converter = utils.strLabelConverter(params.alphabet)
-    print('PREDICTION:')
-    for bbox in bboxes:
-        cropped_img = crop(org_img,bbox)
-        if torch.cuda.is_available():
-            image = cropped_img.cuda()
-        image = image.view(1, *image.size())
-        image = Variable(image)
-        model.eval()
-        preds = model(image)
-
-        _, preds = preds.max(2)
-        preds = preds.transpose(1, 0).contiguous().view(-1)
-
-        preds_size = Variable(torch.IntTensor([preds.size(0)]))
-        raw_pred = converter.decode(preds.data, preds_size.data, raw=True)
-        sim_pred = converter.decode(preds.data, preds_size.data, raw=False)
-        print('%-20s => %-20s' % (raw_pred, sim_pred))
-
 
 def main(args):
     print ('reading image..')
     image = cv2.imread(args.image)
     print ('detecting text')
     bboxes = detect(image)
-    print ('recognizing text')
-    recognise(bboxes,image)
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='image path')
-    parser.add_argument('--img', nargs='?', type=str, default='demo/tr_img_09961.jpg',    
+    parser.add_argument('--img', nargs='?', type=str, default='demo/tr_img_09961.jpg',
                         help='Path to test image')
     args = parser.parse_args()
     main(args)
