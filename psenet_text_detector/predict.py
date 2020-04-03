@@ -33,7 +33,7 @@ def load_psenet_model(cuda: bool = False,
     model = resnet50(pretrained=False, num_classes=7, scale=scale)  # initialize
 
     # check if weights are already downloaded, if not download
-    url = "https://drive.google.com/open?uc=1w2IgRkQXX49AbOARitO5xCr8-N93JHDd"
+    url = "https://drive.google.com/uc?id=1w2IgRkQXX49AbOARitO5xCr8-N93JHDd"
     if os.path.isfile(weight_path) is not True:
         print("PSENet text detector weight will be downloaded to {}"
               .format(weight_path))
