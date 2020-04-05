@@ -26,7 +26,7 @@ def load_psenet_model(cuda: bool = False,
     # get psenet net path
     home_path = str(Path.home())
     weight_path = os.path.join(home_path,
-                               "psenet_text_detector",
+                               ".psenet_text_detector",
                                "weights",
                                "psenet_best.pth")
     # load base resnet model
