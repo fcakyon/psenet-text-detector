@@ -1,5 +1,6 @@
 [![PyPI version](https://badge.fury.io/py/psenet-text-detector.svg)](https://badge.fury.io/py/psenet-text-detector)
-![CI](https://github.com/fcakyon/psenet-text-detector/workflows/CI/badge.svg)
+[![Conda version](https://badge.fury.io/py/psenet-text-detector.svg)](https://anaconda.org/fcakyon/psenet-text-detector)
+[![CI](https://github.com/fcakyon/psenet-text-detector/workflows/CI/badge.svg)](https://github.com/fcakyon/psenet-text-detector/actions?query=event%3Apush+branch%3Amaster+is%3Acompleted+workflow%3ACI)
 
 ## PSENet: Shape Robust Text Detection with Progressive Scale Expansion Network
 Packaged Version of the Pytorch implementation of PSENet text detector
