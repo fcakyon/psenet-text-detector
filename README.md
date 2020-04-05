@@ -11,6 +11,11 @@ PSENet is designed as a segmentation-based detector with multiple predictions fo
 
 ## Getting started
 ### Installation
+- Install using conda for Linux, Mac and Windows (preferred):
+```console
+conda install -c fcakyon psenet-text-detector
+```
+- Install using pip for Linux and Mac:
 ```console
 pip install psenet-text-detector
 ```
